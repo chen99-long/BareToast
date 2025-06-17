@@ -25,6 +25,7 @@
     "vanilla-js"
   ],
   "author": "Chen Long <1422272907@qq.com>",
+  "repository": "https://github.com/chen99-long/BareToast",
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^29.5.0",
