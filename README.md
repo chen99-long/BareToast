@@ -1,6 +1,6 @@
 # BareToast
 
-一个轻量级的原生 Toast 通知库，零依赖，使用 CustomEvent 实现。
+一个轻量级的原生 Toast 通知库，零依赖，使用 CustomEvent 实现，采用 Shadow DOM 实现样式隔离。
 
 ## 特性
 
@@ -10,6 +10,7 @@
 - 🎯 支持自定义样式和动画
 - 🔄 支持手动关闭和自动关闭
 - 📱 响应式设计，适配各种屏幕尺寸
+- 🛡️ 使用 Shadow DOM 实现样式隔离，不会影响页面样式
 
 ## 安装
 
@@ -88,6 +89,14 @@ toast.success('操作成功', 5000)
 toast.error('操作失败', 2000)
 ```
 
+## 样式隔离
+
+BareToast 使用 Shadow DOM 实现样式隔离，这意味着：
+
+1. Toast 组件的样式完全独立，不会受到页面样式的影响
+2. Toast 组件的样式也不会影响到页面其他元素
+3. 无需担心样式冲突问题
+
 ## API
 
 ### 基础方法
@@ -116,26 +125,31 @@ toast.promise<T>(
 
 ## 样式定制
 
-BareToast 使用 CSS 变量来定义样式，你可以通过覆盖这些变量来自定义外观：
+由于使用了 Shadow DOM，样式定制需要通过 CSS 变量来实现。你可以在全局样式中定义以下变量来自定义 Toast 的外观：
 
 ```css
 :root {
+  /* Success 类型 */
   --toast-bg-success: #f0f9ff;
   --toast-color-success: #0c4a6e;
   --toast-border-success: #7dd3fc;
   
+  /* Error 类型 */
   --toast-bg-error: #fef2f2;
   --toast-color-error: #991b1b;
   --toast-border-error: #fca5a5;
   
+  /* Warning 类型 */
   --toast-bg-warning: #fffbeb;
   --toast-color-warning: #92400e;
   --toast-border-warning: #fcd34d;
   
+  /* Info 类型 */
   --toast-bg-info: #f0f9ff;
   --toast-color-info: #1e40af;
   --toast-border-info: #93c5fd;
   
+  /* Loading 类型 */
   --toast-bg-loading: #f9fafb;
   --toast-color-loading: #374151;
   --toast-border-loading: #d1d5db;
@@ -148,6 +162,10 @@ BareToast 使用 CSS 变量来定义样式，你可以通过覆盖这些变量�
 - Firefox >= 55
 - Safari >= 11
 - Edge >= 79
+
+## 贡献
+
+欢迎提交 Issue 和 Pull Request！
 
 ## License
 

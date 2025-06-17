@@ -33,6 +33,7 @@ declare global {
 class ToastManager {
   private messages: Map<string, ToastMessage> = new Map()
   private container: HTMLElement | null = null
+  private shadowRoot: ShadowRoot | null = null
   private initialized = false
 
   constructor() {
@@ -41,9 +42,6 @@ class ToastManager {
 
   private init() {
     if (this.initialized) return
-
-    // 添加CSS样式
-    this.addStyles()
 
     // 确保 DOM 加载完成后再初始化
     if (document.readyState === "loading") {
@@ -57,12 +55,39 @@ class ToastManager {
     this.initialized = true
   }
 
-  private addStyles() {
-    if (document.getElementById("toast-styles")) return
+  private createContainer() {
+    if (this.container) return
 
+    // 创建宿主元素
+    const host = document.createElement("div")
+    host.id = "toast-host"
+
+    // 创建 Shadow DOM
+    this.shadowRoot = host.attachShadow({ mode: "closed" })
+
+    // 添加样式到 Shadow DOM 中
     const style = document.createElement("style")
-    style.id = "toast-styles"
-    style.textContent = `
+    style.textContent = this.getStyles()
+    this.shadowRoot.appendChild(style)
+
+    // 创建容器
+    this.container = document.createElement("div")
+    this.container.id = "toast-container"
+    this.container.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      pointer-events: none;
+      max-width: 400px;
+    `
+
+    this.shadowRoot.appendChild(this.container)
+    document.body.appendChild(host)
+  }
+
+  private getStyles(): string {
+    return `
       @keyframes toast-slide-in {
         from {
           transform: translateX(100%);
@@ -104,10 +129,6 @@ class ToastManager {
         position: relative;
       }
 
-      .toast-icon.loading {
-        animation: none;
-      }
-
       .toast-icon.loading::before {
         content: '';
         position: absolute;
@@ -121,52 +142,77 @@ class ToastManager {
         animation: toast-loading-spin 1s linear infinite;
       }
 
-      .toast-loading-dots {
-        display: inline-flex;
-        gap: 2px;
+      .toast-item {
+        margin-bottom: 12px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        pointer-events: auto;
+        cursor: pointer;
+        animation: toast-slide-in 0.3s ease-out;
+        display: flex;
         align-items: center;
+        gap: 8px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 14px;
+        line-height: 1.4;
+        max-width: 100%;
+        word-wrap: break-word;
+        transition: all 0.3s ease;
       }
 
-      .toast-loading-dots span {
-        width: 4px;
-        height: 4px;
-        border-radius: 50%;
-        background-color: currentColor;
-        animation: toast-loading-dots 1.4s ease-in-out infinite both;
+      .toast-item.slide-out {
+        animation: toast-slide-out 0.3s ease-in-out forwards;
       }
 
-      .toast-loading-dots span:nth-child(1) { animation-delay: -0.32s; }
-      .toast-loading-dots span:nth-child(2) { animation-delay: -0.16s; }
-      .toast-loading-dots span:nth-child(3) { animation-delay: 0s; }
+      .toast-content {
+        flex: 1;
+      }
 
-      @keyframes toast-loading-dots {
-        0%, 80%, 100% {
-          transform: scale(0);
-          opacity: 0.5;
-        }
-        40% {
-          transform: scale(1);
-          opacity: 1;
-        }
+      .toast-close {
+        flex-shrink: 0;
+        font-size: 18px;
+        cursor: pointer;
+        opacity: 0.7;
+        margin-left: 8px;
+        transition: opacity 0.2s;
+      }
+
+      .toast-close:hover {
+        opacity: 1;
+      }
+
+      /* 类型样式 */
+      .toast-success {
+        background-color: #f0f9ff;
+        color: #0c4a6e;
+        border: 1px solid #7dd3fc;
+      }
+
+      .toast-error {
+        background-color: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fca5a5;
+      }
+
+      .toast-warning {
+        background-color: #fffbeb;
+        color: #92400e;
+        border: 1px solid #fcd34d;
+      }
+
+      .toast-info {
+        background-color: #f0f9ff;
+        color: #1e40af;
+        border: 1px solid #93c5fd;
+      }
+
+      .toast-loading {
+        background-color: #f9fafb;
+        color: #374151;
+        border: 1px solid #d1d5db;
       }
     `
-    document.head.appendChild(style)
-  }
-
-  private createContainer() {
-    if (this.container) return
-
-    this.container = document.createElement("div")
-    this.container.id = "toast-container"
-    this.container.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 10000;
-      pointer-events: none;
-      max-width: 400px;
-    `
-    document.body.appendChild(this.container)
   }
 
   private handleToastEvent(event: CustomEvent<ToastEventDetail>) {
@@ -205,9 +251,9 @@ class ToastManager {
   private removeMessage(id: string) {
     if (this.messages.has(id)) {
       this.messages.delete(id)
-      const element = document.getElementById(`toast-${id}`)
+      const element = this.shadowRoot?.getElementById(`toast-${id}`)
       if (element) {
-        element.style.animation = "toast-slide-out 0.3s ease-in-out forwards"
+        element.classList.add("slide-out")
         setTimeout(() => {
           if (element.parentNode) {
             element.remove()
@@ -227,7 +273,7 @@ class ToastManager {
   private updateMessage(message: ToastMessage) {
     if (this.messages.has(message.id)) {
       this.messages.set(message.id, message)
-      const element = document.getElementById(`toast-${message.id}`)
+      const element = this.shadowRoot?.getElementById(`toast-${message.id}`)
       if (element) {
         this.updateMessageElement(element, message)
 
@@ -244,12 +290,8 @@ class ToastManager {
   }
 
   private updateMessageElement(element: HTMLElement, message: ToastMessage) {
-    const styles = this.getTypeStyles(message.type)
-
-    // 更新背景和边框颜色
-    element.style.backgroundColor = styles.bg
-    element.style.color = styles.color
-    element.style.border = `1px solid ${styles.border}`
+    // 更新类名
+    element.className = `toast-item toast-${message.type}`
 
     // 更新图标
     const icon = element.querySelector(".toast-icon") as HTMLElement
@@ -259,7 +301,7 @@ class ToastManager {
         icon.innerHTML = ""
       } else {
         icon.classList.remove("loading")
-        icon.innerHTML = styles.icon
+        icon.innerHTML = this.getTypeIcon(message.type)
       }
     }
 
@@ -282,20 +324,6 @@ class ToastManager {
         closeBtn = document.createElement("span")
         closeBtn.className = "toast-close"
         closeBtn.innerHTML = "×"
-        closeBtn.style.cssText = `
-          flex-shrink: 0;
-          font-size: 18px;
-          cursor: pointer;
-          opacity: 0.7;
-          margin-left: 8px;
-          transition: opacity 0.2s;
-        `
-        closeBtn.addEventListener("mouseenter", () => {
-          closeBtn.style.opacity = "1"
-        })
-        closeBtn.addEventListener("mouseleave", () => {
-          closeBtn.style.opacity = "0.7"
-        })
         closeBtn.addEventListener("click", (e) => {
           e.stopPropagation()
           this.removeMessage(message.id)
@@ -310,30 +338,7 @@ class ToastManager {
 
     const toastElement = document.createElement("div")
     toastElement.id = `toast-${message.id}`
-    toastElement.style.cssText = `
-      margin-bottom: 12px;
-      padding: 12px 16px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      pointer-events: auto;
-      cursor: pointer;
-      animation: toast-slide-in 0.3s ease-out;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-size: 14px;
-      line-height: 1.4;
-      max-width: 100%;
-      word-wrap: break-word;
-      transition: all 0.3s ease;
-    `
-
-    // 根据类型设置样式和图标
-    const styles = this.getTypeStyles(message.type)
-    toastElement.style.backgroundColor = styles.bg
-    toastElement.style.color = styles.color
-    toastElement.style.border = `1px solid ${styles.border}`
+    toastElement.className = `toast-item toast-${message.type}`
 
     // 添加图标
     const icon = document.createElement("span")
@@ -342,14 +347,13 @@ class ToastManager {
       icon.classList.add("loading")
       icon.innerHTML = "" // loading 使用 CSS 动画
     } else {
-      icon.innerHTML = styles.icon
+      icon.innerHTML = this.getTypeIcon(message.type)
     }
 
     // 添加内容
     const content = document.createElement("span")
     content.className = "toast-content"
     content.textContent = message.content
-    content.style.cssText = "flex: 1;"
 
     toastElement.appendChild(icon)
     toastElement.appendChild(content)
@@ -359,20 +363,6 @@ class ToastManager {
       const closeBtn = document.createElement("span")
       closeBtn.className = "toast-close"
       closeBtn.innerHTML = "×"
-      closeBtn.style.cssText = `
-        flex-shrink: 0;
-        font-size: 18px;
-        cursor: pointer;
-        opacity: 0.7;
-        margin-left: 8px;
-        transition: opacity 0.2s;
-      `
-      closeBtn.addEventListener("mouseenter", () => {
-        closeBtn.style.opacity = "1"
-      })
-      closeBtn.addEventListener("mouseleave", () => {
-        closeBtn.style.opacity = "0.7"
-      })
       closeBtn.addEventListener("click", (e) => {
         e.stopPropagation()
         this.removeMessage(message.id)
@@ -390,40 +380,15 @@ class ToastManager {
     this.container.appendChild(toastElement)
   }
 
-  private getTypeStyles(type: ToastType) {
-    const styles = {
-      success: {
-        bg: "#f0f9ff",
-        color: "#0c4a6e",
-        border: "#7dd3fc",
-        icon: "✓",
-      },
-      error: {
-        bg: "#fef2f2",
-        color: "#991b1b",
-        border: "#fca5a5",
-        icon: "✕",
-      },
-      warning: {
-        bg: "#fffbeb",
-        color: "#92400e",
-        border: "#fcd34d",
-        icon: "⚠",
-      },
-      info: {
-        bg: "#f0f9ff",
-        color: "#1e40af",
-        border: "#93c5fd",
-        icon: "ℹ",
-      },
-      loading: {
-        bg: "#f9fafb",
-        color: "#374151",
-        border: "#d1d5db",
-        icon: "",
-      },
+  private getTypeIcon(type: ToastType): string {
+    const icons = {
+      success: "✓",
+      error: "✕",
+      warning: "⚠",
+      info: "ℹ",
+      loading: "",
     }
-    return styles[type]
+    return icons[type]
   }
 }
 
