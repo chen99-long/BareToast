@@ -77,7 +77,7 @@ class ToastManager {
       position: fixed;
       top: 20px;
       right: 20px;
-      z-index: 10000;
+      z-index: 2147483647;
       pointer-events: none;
       max-width: 400px;
     `
