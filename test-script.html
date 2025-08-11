@@ -14,11 +14,16 @@
     
     <script>
         function testToast() {
-            console.log('BareToast对象:', BareToast);
-            
+            console.log('BareToast对象:', window.BareToast);
+
+            if (!window.BareToast) {
+                console.error('BareToast未正确加载！');
+                return;
+            }
+
             // 测试默认导出
             BareToast.default.success('通过默认导出调用成功！');
-            
+
             // 测试命名导出
             const { toast } = BareToast;
             setTimeout(() => {

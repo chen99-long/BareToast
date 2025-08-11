@@ -32,6 +32,12 @@ npm install bare-toast
 
 ```html
 <!-- 通过 script 标签直接引入 -->
+<script src="https://unpkg.com/bare-toast@1.1.1/dist/index.umd.js"></script>
+
+<!-- 或者使用 jsDelivr CDN -->
+<script src="https://cdn.jsdelivr.net/npm/bare-toast@1.1.1/dist/index.umd.js"></script>
+
+<!-- 使用 latest 标签（可能有缓存延迟） -->
 <script src="https://unpkg.com/bare-toast@latest/dist/index.umd.js"></script>
 ```
 

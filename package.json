@@ -1,6 +1,6 @@
 {
   "name": "bare-toast",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "一个轻量级的原生 Toast 通知库，零依赖，使用 CustomEvent 实现",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -10,7 +10,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "rollup -c",
+    "build": "rollup -c && node scripts/build-browser.js",
+    "build:rollup": "rollup -c",
+    "build:browser": "node scripts/build-browser.js",
     "dev": "rollup -c -w",
     "test": "jest",
     "lint": "eslint src --ext .ts",

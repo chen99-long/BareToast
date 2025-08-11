@@ -10,15 +10,21 @@ All notable changes to this project will be documented in this file.
 - 🌐 支持通过 CDN 引入：`<script src="https://unpkg.com/bare-toast@latest/dist/index.umd.js"></script>`
 - 📖 添加了完整的 script 标签使用示例和文档
 - 🎯 创建了 `example.html` 演示文件，展示各种使用方式
+- 🛠️ 添加了自动化构建脚本 `scripts/build-browser.js`
 
 ### Changed
 - 📝 更新了 README.md，添加了 script 标签引入的详细说明
 - 📦 在 package.json 中添加了 `browser` 字段，指向 UMD 版本
+- 🔧 优化了构建流程，确保生成真正的浏览器友好版本
+
+### Fixed
+- 🐛 **修复了 "exports is not defined" 错误**：使用 IIFE 格式替代有问题的 UMD 包装器
+- ✅ 确保浏览器版本不依赖 Node.js 的 exports 对象
 
 ### Technical Details
-- 🔧 修改 rollup.config.js，添加 UMD 格式构建配置
+- 🔧 使用自定义构建脚本生成浏览器版本，避免 Rollup UMD 格式的问题
 - 🌍 UMD 版本通过全局变量 `BareToast` 暴露，支持 `BareToast.default` 和 `BareToast.toast` 两种访问方式
-- 📏 UMD 文件大小约 20KB，包含完整功能和类型定义
+- 📏 UMD 文件大小约 18.5KB，包含完整功能
 
 ### Usage Examples
 
