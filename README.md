@@ -20,7 +20,24 @@ npm install bare-toast
 
 ## 使用方法
 
+### 安装方式
+
+#### NPM 安装
+
+```bash
+npm install bare-toast
+```
+
+#### CDN 引入
+
+```html
+<!-- 通过 script 标签直接引入 -->
+<script src="https://unpkg.com/bare-toast@latest/dist/index.umd.js"></script>
+```
+
 ### 基础用法
+
+#### ES Module 方式
 
 ```typescript
 import toast from 'bare-toast'
@@ -44,6 +61,39 @@ toast.remove(loadingId)
 
 // 清除所有提示
 toast.clear()
+```
+
+#### Script 标签方式
+
+```html
+<script src="./dist/index.umd.js"></script>
+<script>
+  // 通过全局变量 BareToast 访问
+  const { toast } = BareToast;
+
+  // 或者直接使用默认导出
+  BareToast.default.success('操作成功');
+
+  // 成功提示
+  toast.success('操作成功');
+
+  // 错误提示
+  toast.error('操作失败');
+
+  // 警告提示
+  toast.warning('请注意');
+
+  // 信息提示
+  toast.info('这是一条信息');
+
+  // 加载提示
+  const loadingId = toast.loading('加载中...');
+  // 手动关闭加载提示
+  toast.remove(loadingId);
+
+  // 清除所有提示
+  toast.clear();
+</script>
 ```
 
 ### Promise 操作

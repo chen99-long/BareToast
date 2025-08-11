@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BareToast Script标签测试</title>
+</head>
+<body>
+    <h1>BareToast Script标签测试</h1>
+    <button onclick="testToast()">测试Toast</button>
+    
+    <!-- 引入BareToast UMD版本 -->
+    <script src="./dist/index.umd.js"></script>
+    
+    <script>
+        function testToast() {
+            console.log('BareToast对象:', BareToast);
+            
+            // 测试默认导出
+            BareToast.default.success('通过默认导出调用成功！');
+            
+            // 测试命名导出
+            const { toast } = BareToast;
+            setTimeout(() => {
+                toast.info('通过命名导出调用成功！');
+            }, 1000);
+        }
+        
+        // 页面加载完成后自动测试
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testToast();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

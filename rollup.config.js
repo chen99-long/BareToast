@@ -13,6 +13,13 @@ export default {
       format: 'esm',
       sourcemap: true,
     },
+    {
+      file: 'dist/index.umd.js',
+      format: 'umd',
+      name: 'BareToast',
+      sourcemap: true,
+      exports: 'named',
+    },
   ],
   plugins: [
     typescript({
@@ -21,4 +28,4 @@ export default {
     }),
   ],
   external: [],
-} 
+}
