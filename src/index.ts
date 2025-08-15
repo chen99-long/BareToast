@@ -123,10 +123,13 @@ class ToastManager {
         flex-shrink: 0;
         font-size: 16px;
         transition: all 0.3s ease;
-        display: inline-block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         width: 16px;
         height: 16px;
         position: relative;
+        line-height: 1;
       }
 
       .toast-icon.loading::before {
